@@ -46,6 +46,19 @@ public class FileManager {
     }
   }
 
+  private static String getConfirmedUserInput(String labelText,
+    String confirmLabelText) {
+    Console console = System.console();
+    String userInput = new String(console.readPassword(labelText));
+    String confirmUserInput = new String(console.readPassword(confirmLabelText));
+
+    if (userInput.equals(confirmUserInput)) {
+      return userInput;
+    }
+    System.out.println("Confirmation failed. You entered different values.");
+    return getConfirmedUserInput(labelText, confirmLabelText);
+  }
+
   public static void main(String[] args) {
     if (args.length != 2) {
       System.out.println("Must provide an action and a file name");
@@ -61,8 +74,7 @@ public class FileManager {
       return;
     }
 
-    Console console = System.console();
-    String key = new String(console.readPassword("Passphrase: "));
+    String key = getConfirmedUserInput("Passphrase: ", "Confirm Passphrase: ");
     handleCryptoRequest(fileInput, key, action, fileInput.getName());
   }
 }
