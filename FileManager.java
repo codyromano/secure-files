@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Properties;
 
 public class FileManager {
   public static void handleCryptoRequest(File fileInput, String key,
@@ -14,12 +15,21 @@ public class FileManager {
       String outputFileName = action + "/" + fileName;
       File outputFile = new File(outputFileName);
 
+      String rootPath = Thread.currentThread().getContextClassLoader()
+        .getResource("").getPath();
+      String appConfigPath = rootPath + "fileManager.properties";
+
+      Properties appProps = new Properties();
+      appProps.load(new FileInputStream(appConfigPath));
+
+      String salt = appProps.getProperty("salt");
+
       switch (action) {
         case "encrypt":
-          CryptoUtils.encrypt(key, fileInput, outputFile);
+          CryptoUtils.encrypt(salt, key, fileInput, outputFile);
         break;
         case "decrypt":
-          CryptoUtils.decrypt(key, fileInput, outputFile);
+          CryptoUtils.decrypt(salt, key, fileInput, outputFile);
         break;
         default:
           System.out.println("Unknown action \"" + action + "\"");
@@ -52,7 +62,7 @@ public class FileManager {
     }
 
     Console console = System.console();
-    String key = new String(console.readPassword("Encryption passphrase: "));
+    String key = new String(console.readPassword("Passphrase: "));
     handleCryptoRequest(fileInput, key, action, fileInput.getName());
   }
 }

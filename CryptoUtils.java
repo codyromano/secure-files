@@ -19,19 +19,17 @@ public class CryptoUtils {
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES";
  
-    public static void encrypt(String key, File inputFile, File outputFile)
+    public static void encrypt(String salt, String key, File inputFile, File outputFile)
             throws CryptoException {
-        doCrypto(Cipher.ENCRYPT_MODE, key, inputFile, outputFile);
+        doCrypto(salt, Cipher.ENCRYPT_MODE, key, inputFile, outputFile);
     }
  
-    public static void decrypt(String key, File inputFile, File outputFile)
+    public static void decrypt(String salt, String key, File inputFile, File outputFile)
             throws CryptoException {
-        doCrypto(Cipher.DECRYPT_MODE, key, inputFile, outputFile);
+        doCrypto(salt, Cipher.DECRYPT_MODE, key, inputFile, outputFile);
     }
 
-    private static Key getSecretKey(String userKeyString) {
-      // TODO: Store elsewhere
-      String salt = "salty-dkdk33($@@";
+    private static Key getSecretKey(String salt, String userKeyString) {
       byte[] key = null;
 
       try {
@@ -51,11 +49,11 @@ public class CryptoUtils {
       return new SecretKeySpec(key, ALGORITHM);
     }
  
-    private static void doCrypto(int cipherMode, String key, File inputFile,
+    private static void doCrypto(String salt, int cipherMode, String key, File inputFile,
             File outputFile) throws CryptoException {
         try {
-            Key secretKey = getSecretKey(key);
-            // Key secretKey = new SecretKeySpec(key.getBytes(), ALGORITHM);
+            Key secretKey = getSecretKey(salt, key);
+
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             cipher.init(cipherMode, secretKey);
              
@@ -74,7 +72,7 @@ public class CryptoUtils {
         } catch (NoSuchPaddingException | NoSuchAlgorithmException
                 | InvalidKeyException | BadPaddingException
                 | IllegalBlockSizeException | IOException ex) {
-            throw new CryptoException("Error encrypting/decrypting file", ex);
+            throw new CryptoException("Error encrypting/decrypting file. Most likely an INVALID PASSWORD", ex);
         }
     }
 }
