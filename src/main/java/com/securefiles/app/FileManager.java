@@ -1,3 +1,5 @@
+package com.securefiles.app;
+
 import java.io.*;
 import java.util.Properties;
 

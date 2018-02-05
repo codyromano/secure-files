@@ -1,3 +1,5 @@
+package com.securefiles.app;
+
 public class CryptoException extends Exception {
  
     public CryptoException() {
