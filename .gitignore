@@ -1,4 +1,5 @@
 *.class
 encrypt/
 decrypt/
+target/
 fileManager.properties
