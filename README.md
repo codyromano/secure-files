@@ -10,16 +10,19 @@ cd secure-files
 
 # Update to use your own salt
 mv fileManager.properties.example fileManager.properties
-open fileManager.properties 
+open fileManager.properties
 
 # Build the project
-javac FileManager.java
+mvn package
+
+# Create a shortcut for easy use
+sh ./create-secure-files-shortcut.sh
 ```
 ## Encrypt
 ```
 echo "Super secret" > secret.txt
-java FileManager encrypt secret.txt
+sf encrypt secret.txt
 ```
 ## Decrypt
 ```
-java FileManager decrypt ./encrypt/secret.txt
+sf decrypt ./encrypt/secret.txt
