@@ -22,12 +22,12 @@ public class CryptoUtils {
     private static final String TRANSFORMATION = "AES";
  
     public static void encrypt(String salt, String key, File inputFile, File outputFile)
-            throws CryptoException {
+            throws CryptoException, IOException {
         doCrypto(salt, Cipher.ENCRYPT_MODE, key, inputFile, outputFile);
     }
  
     public static void decrypt(String salt, String key, File inputFile, File outputFile)
-            throws CryptoException {
+            throws CryptoException, IOException {
         doCrypto(salt, Cipher.DECRYPT_MODE, key, inputFile, outputFile);
     }
 
@@ -52,29 +52,37 @@ public class CryptoUtils {
     }
  
     private static void doCrypto(String salt, int cipherMode, String key, File inputFile,
-            File outputFile) throws CryptoException {
+            File outputFile) throws CryptoException, IOException {
+
+        FileInputStream inputStream = null;
+        FileOutputStream outputStream = null;
+
         try {
             Key secretKey = getSecretKey(salt, key);
 
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             cipher.init(cipherMode, secretKey);
              
-            FileInputStream inputStream = new FileInputStream(inputFile);
+            inputStream = new FileInputStream(inputFile);
             byte[] inputBytes = new byte[(int) inputFile.length()];
             inputStream.read(inputBytes);
              
             byte[] outputBytes = cipher.doFinal(inputBytes);
              
-            FileOutputStream outputStream = new FileOutputStream(outputFile);
+            outputStream = new FileOutputStream(outputFile);
             outputStream.write(outputBytes);
-             
-            inputStream.close();
-            outputStream.close();
              
         } catch (NoSuchPaddingException | NoSuchAlgorithmException
                 | InvalidKeyException | BadPaddingException
                 | IllegalBlockSizeException | IOException ex) {
             throw new CryptoException("Error encrypting/decrypting file. Most likely an INVALID PASSWORD", ex);
+        } finally {
+            if (inputStream != null) {
+              inputStream.close();
+            }
+            if (outputStream != null) {
+              outputStream.close();
+            }
         }
     }
 }
