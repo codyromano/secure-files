@@ -1,38 +1,87 @@
 package com.securefiles.app;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
+import java.util.Properties;
+import java.lang.Exception;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.File;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
+public class AppTest {
+  private App app;
+  private static String TEST_FILE_ENCODING = "UTF-8";
+  private static String PASS_PHRASE = "This is my pass phrase!";
+
+  // TODO: Move this exception elsewhere
+  private class CryptoTestIOException extends Exception {
+    public CryptoTestIOException(String message) {
+      super(message);
+    }
+  }
+
+  /**
+  * @todo Move to utils
+  * @throws CryptoTestIOException if test files cannot be read or written in the filesystem
+  */
+  private File createTestFile(String fileName, String content) throws CryptoTestIOException {
+    PrintWriter writer = null;
+
+    try {
+      writer = new PrintWriter(fileName, AppTest.TEST_FILE_ENCODING);
+      writer.println(content);
+    } catch (Exception ex) {
+      throw new CryptoTestIOException("Error creating test file " + fileName + ". " +
+        "Could not perform the necessary I/O operations.");
+    } finally {
+      if (writer != null) {
+        writer.close();
+      }
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+    return new File(fileName);
+  }
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+  @Test
+  public void testGetAppProperties() {
+    Properties testProperties = app.getAppProperties();
+    assertNotNull(testProperties.get("salt"));
+  }
+
+  @Test
+  public void testCreateFileWithEncryptedContents() throws CryptoTestIOException {
+    // Create a plaintext file for testing
+    String plainTextFileName = "secret.txt";
+    String plainText = "My secret content!";
+
+    File plainTextFile = createTestFile(plainTextFileName, plainText);
+
+    // Encrypt the file
+    String encryptedFilePath = app.handleCryptoRequest(
+      plainTextFile,
+      AppTest.PASS_PHRASE,
+      App.ACTION_ENCRYPT,
+      plainTextFileName
+    );
+
+    try {
+      String encryptedContents = new String( Files.readAllBytes( Paths.get(encryptedFilePath)) );
+
+      // Ensure the encrypted content is a non-empty string that differs from the plain text
+      assertEquals(encryptedContents.length() > 0, true);
+      assertEquals(encryptedContents.equals(plainText), false);
+
+    } catch (IOException ex) {
+      throw new CryptoTestIOException("Cannot read encrypted file at path " + encryptedFilePath);
     }
+  }
+
+  @Test
+  public void testDecryptAndReadEncryptedFile() throws CryptoTestIOException {
+    // TODO: Implement test
+  }
 }

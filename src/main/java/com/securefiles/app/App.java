@@ -4,6 +4,9 @@ import java.io.*;
 import java.util.Properties;
 
 public class App {
+  public static String ACTION_ENCRYPT = "encrypt";
+  public static String ACTION_DECRYPT = "decrypt";
+
   public static Properties getAppProperties() {
     Properties appProps = null;
 
@@ -20,8 +23,16 @@ public class App {
     return appProps;
   }
 
-  public static void handleCryptoRequest(File fileInput, String key,
-    String action, String fileName) {
+  /**
+  * @return Path to file created
+  */
+  public static String handleCryptoRequest(
+    File fileInput,
+    String key,
+    String action,
+    String fileName
+  ) {
+    String outputFileName = null;
 
     try {
       // Create separate directories for "encrypt" and "decrypt" as needed
@@ -30,7 +41,7 @@ public class App {
         directory.mkdirs();
       }
 
-      String outputFileName = action + "/" + fileName;
+      outputFileName = action + "/" + fileName;
       File outputFile = new File(outputFileName);
 
       // TODO: Research better way of managing .properties file. It should
@@ -59,6 +70,8 @@ public class App {
       System.out.println(ex.getMessage());
       ex.printStackTrace();
     }
+
+    return outputFileName;
   }
 
   private static String getConfirmedUserInput(String labelText,
